@@ -2,6 +2,22 @@ class Checkout
   attr_reader :prices
   private :prices
 
+  DISCOUNT_RULES = {
+    two_for_one: -> (price, count) { price * (count / (count % 2 == 0 ? 2 : 1)) },
+    half_price: -> (price, count) { (price / 2) * count },
+    half_on_first: -> (price, count) { price / 2 + price * (count - 1) },
+    none: -> (price, count) { price * count }
+  }.freeze
+
+  PRODUCT_PRICE_RULES = {
+    apple: DISCOUNT_RULES[:two_for_one],
+    pear: DISCOUNT_RULES[:two_for_one],
+    banana: DISCOUNT_RULES[:half_price],
+    pineapple: DISCOUNT_RULES[:half_on_first]
+  }.tap do |it|
+    it.default = DISCOUNT_RULES[:none]
+  end
+
   def initialize(prices)
     @prices = prices
   end
@@ -12,22 +28,8 @@ class Checkout
 
   def total
     basket.tally
-          .map { |item, count|
-            case item
-            when :apple, :pear
-              if (count % 2 == 0)
-                prices.fetch(item) * (count / 2)
-              else
-                prices.fetch(item) * count
-              end
-            when :pineapple
-              (prices.fetch(item) / 2) + (prices.fetch(item)) * (count - 1)
-            when :banana
-              (prices.fetch(item) / 2) * count
-            else
-              prices.fetch(item) * count
-            end
-          }.sum
+          .map { |item, count| PRODUCT_PRICE_RULES[item].call(prices[item], count) }
+          .sum
   end
 
   private
