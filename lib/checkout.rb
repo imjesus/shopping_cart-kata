@@ -6,14 +6,16 @@ class Checkout
     two_for_one: -> (price, count) { price * (count / (count % 2 == 0 ? 2 : 1)) },
     half_price: -> (price, count) { (price / 2) * count },
     half_on_first: -> (price, count) { price / 2 + price * (count - 1) },
-    none: -> (price, count) { price * count }
+    none: -> (price, count) { price * count },
+    buy_3_get_1: -> (price, count) { price * (count / 3 * 2 + count % 3) }
   }.freeze
 
   PRODUCT_PRICE_RULES = {
     apple: DISCOUNT_RULES[:two_for_one],
     pear: DISCOUNT_RULES[:two_for_one],
     banana: DISCOUNT_RULES[:half_price],
-    pineapple: DISCOUNT_RULES[:half_on_first]
+    pineapple: DISCOUNT_RULES[:half_on_first],
+    mango: DISCOUNT_RULES[:buy_3_get_1]
   }.tap do |it|
     it.default = DISCOUNT_RULES[:none]
   end
