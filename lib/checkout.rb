@@ -1,23 +1,17 @@
+require_relative "./discount_rules.rb"
+
 class Checkout
   attr_reader :prices
   private :prices
 
-  DISCOUNT_RULES = {
-    two_for_one: -> (price, count) { price * (count / (count % 2 == 0 ? 2 : 1)) },
-    half_price: -> (price, count) { (price / 2) * count },
-    half_on_first: -> (price, count) { price / 2 + price * (count - 1) },
-    none: -> (price, count) { price * count },
-    buy_3_get_1: -> (price, count) { price * (count / 3 * 2 + count % 3) }
-  }.freeze
-
   PRODUCT_PRICE_RULES = {
-    apple: DISCOUNT_RULES[:two_for_one],
-    pear: DISCOUNT_RULES[:two_for_one],
-    banana: DISCOUNT_RULES[:half_price],
-    pineapple: DISCOUNT_RULES[:half_on_first],
-    mango: DISCOUNT_RULES[:buy_3_get_1]
+    apple:     DiscountRules.method(:two_for_one),
+    pear:      DiscountRules.method(:two_for_one),
+    banana:    DiscountRules.method(:half_price),
+    pineapple: DiscountRules.method(:half_on_first),
+    mango:     DiscountRules.method(:buy_3_get_1)
   }.tap do |it|
-    it.default = DISCOUNT_RULES[:none]
+    it.default = DiscountRules.method(:none)
   end
 
   def initialize(prices)
