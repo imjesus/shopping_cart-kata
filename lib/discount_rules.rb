@@ -18,4 +18,12 @@ module DiscountRules
   def self.none(price, count)
     price * count
   end
+
+  def self.apply(rule, price, count)
+    if methods(false).include?(rule)
+      send(rule, price, count)
+    else
+      none(price, count)
+    end
+  end
 end

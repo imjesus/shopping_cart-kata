@@ -42,4 +42,21 @@ RSpec.describe DiscountRules do
       expect(DiscountRules.none(10, 5)).to eq(50)
     end
   end
+
+  describe "apply" do
+    it "applies a known rule to the price and count that are given" do
+      expect(DiscountRules.apply(:two_for_one, 10, 2)).to eq(10)
+      expect(DiscountRules.apply(:half_price, 10, 3)).to eq(15)
+      expect(DiscountRules.apply(:half_on_first, 10, 4)).to eq(35)
+      expect(DiscountRules.apply(:buy_3_get_1, 10, 4)).to eq(30)
+    end
+
+    it "applies the 'none' rule when given a nil rule" do
+      expect(DiscountRules.apply(nil, 10, 2)).to eq(20)
+    end
+
+    it "applies the 'none' rule when given an unknown rule" do
+      expect(DiscountRules.apply(:bonkers, 10, 2)).to eq(20)
+    end
+  end
 end

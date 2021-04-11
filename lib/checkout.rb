@@ -1,22 +1,10 @@
-require_relative "./discount_rules.rb"
+require_relative "./price_calculator.rb"
 
 class Checkout
-  attr_reader :prices
-  private :prices
-
-  PRODUCT_PRICE_RULES = {
-    apple:     DiscountRules.method(:two_for_one),
-    pear:      DiscountRules.method(:two_for_one),
-    banana:    DiscountRules.method(:half_price),
-    pineapple: DiscountRules.method(:half_on_first),
-    mango:     DiscountRules.method(:buy_3_get_1)
-  }.tap do |it|
-    it.default = DiscountRules.method(:none)
+  def initialize(prices, rules)
+    @price_calculator = PriceCalculator.new(prices, rules)
   end
-
-  def initialize(prices)
-    @prices = prices
-  end
+  # NOTE: I've made a concious decision of not using an attr_reader. We can discuss later.
 
   def scan(item)
     basket << item.to_sym
@@ -24,7 +12,7 @@ class Checkout
 
   def total
     basket.tally
-          .map { |item, count| PRODUCT_PRICE_RULES[item].call(prices[item], count) }
+          .map { |item, count| @price_calculator.calculate(item, count) }
           .sum
   end
 
